@@ -18,7 +18,7 @@ def switch_to_entry():
 
 
 def found_model(cabin : str, shaft: str):
-    print("FOUND ELEVATOR")
+    print("FOUND")
     visualizer_scene.load_elevator(cabin, shaft)
 
 

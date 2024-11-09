@@ -33,18 +33,27 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.title = Text("Or submit the files Individually", position=(0, 0.1), origin=(0, 0))
         
         # Add the elevator model dropdown menu
-        self.elevator_text = Text("Elevator Model", x=-0.3, y=-0.02, origin=(0, 0))
+        self.elevator_text = Text("Elevator Model", origin=(0, -1))
         self.elevator_select_menu = DropdownMenu("Select", buttons=(
             DropdownMenuButton("Model 1"),
             DropdownMenuButton("Model 2"),
-        ), x=-0.3, y=-0.06, origin=(0, 0))
+        ), x=-0.115, y=0)
 
+        self.eleveator_wrapper = Entity(parent=self.ui, origin=(0,0), position=(-0.3, -0.06))
+        self.elevator_text.parent = self.eleveator_wrapper
+        self.elevator_select_menu.parent = self.eleveator_wrapper
+        
         # Add the shaft model dropdown menu
-        self.shaft_text = Text("Shaft Model", position=(0.3, -0.02), origin=(0, 0))
+        self.shaft_text = Text("Shaft Model", origin=(0 , -1), position=(0,0))
         self.shaft_select_menu = DropdownMenu("Select", buttons=(
             DropdownMenuButton("Model 1"),
-            DropdownMenuButton("Model 2"),
-        ), position=(0.3, -0.06), origin=(0, 0))
+            DropdownMenuButton("Model 2")),
+            position=(-0.115, 0)
+        )   
+        
+        self.shaft_wrapper = Entity(parent=self.ui, origin=(0,0), position=(0.3, -0.06))
+        self.shaft_text.parent = self.shaft_wrapper
+        self.shaft_select_menu.parent = self.shaft_wrapper
 
         # Metadata file button
         self.metadata_text = Text("Metadata", x=-0.3, y=-0.2, origin=(0, 0))
@@ -59,15 +68,22 @@ class EntryScene(scenes.scene_object.SceneObject):
         # Add every entity to the scene
         self.autofill_title.parent = self.ui
         self.select_button.parent = self.ui
-            self.title.parent = self.ui
-        self.elevator_text.parent = self.ui
-        self.elevator_select_menu.parent = self.ui
-        self.shaft_text.parent = self.ui
-        self.shaft_select_menu.parent = self.ui
+        self.title.parent = self.ui
         self.metadata_text.parent = self.ui
         self.metadata_fb.parent = self.ui
         self.floor_plans_text.parent = self.ui
         self.floor_plans_fb.parent = self.ui
+    
+        self.select_button = Button(text='Select Demo World', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.4)
+    
+    
+        self.select_button.tooltip = Tooltip('Select a 3D model to use')
+        self.select_button.on_click = self.select_button_macro
+    
+    
+        #Subscription variables
+        self.found_elevator_callback = None
+        self.move_to_visualizer = None
     
     def select_button_macro(self):
         self.select_model()
