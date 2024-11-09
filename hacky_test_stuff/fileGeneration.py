@@ -121,36 +121,41 @@ def plot2dWith(data):
 
 
 # Initialize lists to hold vertices and faces
-vertices = []
-faces = []
 #important  ^^
 
 # Function to add a quadrilateral polygon to vertices and faces
-def add_polygon(polygon,start_index=0):
-    #start_index = len(vertices)   # Index starts from current length + 1
-
-    # Define the four vertices for the polygon's base and top
-    for each in polygon:
-        x=each[0]
-        y=each[1]
-        z=each[2]
-        vertices.append((x, y, z))      # Top vertex at z = height
-
-    # Define two faces (bottom and top) using vertex indices
-    faces.append([start_index + 4, start_index + 1, start_index + 2, start_index + 3])
-    faces.append([start_index + 1, start_index + 4, start_index + 3, start_index + 2])
-    #faces.append([start_index + 2, start_index + 3, start_index + 4, start_index + 1])
-    #faces.append([start_index + 3, start_index + 2, start_index + 1, start_index + 4])
 
 def createOBJFile(name,data,floor_height=10,floor_start_height=0):
 
+
+    vertices = []
+    faces = []
+
     walls =[]
     index=0
+    bottomPolygons = []
+
+    def add_polygon(polygon,start_index=0):
+        #start_index = len(vertices)   # Index starts from current length + 1
+
+        # Define the four vertices for the polygon's base and top
+        for each in polygon:
+            x=each[0]
+            y=each[1]
+            z=each[2]
+            vertices.append((x, y, z))      # Top vertex at z = height
+
+        # Define two faces (bottom and top) using vertex indices
+        faces.append([start_index + 4, start_index + 1, start_index + 2, start_index + 3])
+        faces.append([start_index + 1, start_index + 4, start_index + 3, start_index + 2])
+        #faces.append([start_index + 2, start_index + 3, start_index + 4, start_index + 1])
+        #faces.append([start_index + 3, start_index + 2, start_index + 1, start_index + 4])
 
     for each in data['walls']:
         walls.append(each["position"])
         # List to store the wall polygons
         polygons = []
+
 
         # Create 3D wall polygons for each wall segment
 
@@ -158,6 +163,7 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
             # Get the start and end point of the wall segment
             (x1, y1), (x2, y2) = wall
             offset=10
+
 
             # Define the four corners of the wall polygon
             polygon1 = [
@@ -173,13 +179,24 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
                 [x2/20-offset, y2/20-offset,floor_start_height+floor_height],  # Top point 2
                 [x1/20-offset, y1/20-offset, floor_start_height+floor_height]   # Top point 1
             ]
-
+            bottomPolygons.append([x1/20-offset, y1/20-offset, floor_start_height])
+            bottomPolygons.append([x2/20-offset, y2/20-offset, floor_start_height])
             polygons.append(polygon1)
             polygons.append(polygon2)
 
     for each in polygons:
             add_polygon(each, index)
             index+=4
+
+    import trimesh
+
+        # Calculate floor vertices (assuming the floor is at the same height as the wall bottom points)
+    floor_vertices = bottomPolygons
+
+        # Calculate floor faces (assuming the points form a closed loop)
+    num_vertices = len(floor_vertices)
+    floor_faces = [[i, (i + 1) % num_vertices, (i + 1) % num_vertices, i] for i in range(num_vertices)]
+
 
 
 
@@ -193,6 +210,22 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
         for face in faces:
             file.write(f"f {' '.join(map(str, face))}\n")
 
+        for face in floor_faces:
+            file.write(f"f {' '.join(map(str, face))}\n")
+
+
+
+        def generate_pattern(n):
+            pattern = []
+            i = 1
+            while i < n:
+                if i + 1 < n:
+                    pattern.append(f"{i} {i+1}")
+                i += 4
+            print(pattern)
+            return pattern
+
+        file.write(f"f {' '.join(generate_pattern(len(vertices)))}\n")
 
 #file1=gatherData("../data/sit2_f1.jpg")
 #file2=gatherData("../data/sit2_f2.jpg")

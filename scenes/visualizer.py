@@ -63,7 +63,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         floor_array = []
         building_parent = Entity()
         if name:
-            for i in range(10):
+            for i in range(4):
                 this_floor = Entity(model=f'floor{i}.obj', y=i, collider='box')
                 this_floor.scale = (0.1, 0.5, 0.1)
                 this_floor.color = self.default_floor_color
@@ -76,6 +76,8 @@ class VisualizerScene(scenes.scene_object.SceneObject):
                 this_floor = Entity(model='cube', scale=(10, 1, 10), y=i, collider='box')
                 this_floor.color = self.default_floor_color
                 this_floor.shader = lit_with_shadows_shader
+                floor_array.append(this_floor)
+                floor_array.append(this_floor)
                 floor_array.append(this_floor)
                 this_floor.parent = building_parent
         building_parent.children[0].on_click = self.check_click
