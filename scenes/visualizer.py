@@ -29,11 +29,13 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.spin_button.parent = self.ui
         
         self.place_button = Button(text='Place Elevator', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.3, color=color.azure)
+        self.place_button.fit_to_text()
         self.place_button.tooltip = Tooltip('Place an elevator')
         self.place_button.on_click = self.place_elevator_call
         self.place_button.parent = self.ui
         
         self.done_placing_button = Button(text='Done Placing', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.2, color=color.azure)
+        self.done_placing_button.fit_to_text()
         self.done_placing_button.tooltip = Tooltip('Done placing the elevator')
         self.done_placing_button.on_click = self.done_placing
         self.done_placing_button.parent = self.ui
