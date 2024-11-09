@@ -2,6 +2,7 @@ from ursina import *
 import scenes.scene_object
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 from ursina.prefabs.file_browser import FileButton
+from ursina.prefabs.input_field import InputField
 import tkinter as tk
 from tkinter import filedialog
 
@@ -57,16 +58,12 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.elevator_select_menu.parent = self.eleveator_wrapper
         
         # Add the shaft model dropdown menu
-        self.shaft_text = Text("Shaft Model", origin=(0 , -1), position=(0,0))
-        self.shaft_select_menu = DropdownMenu("Select", buttons=(
-            DropdownMenuButton("Model 1"),
-            DropdownMenuButton("Model 2")),
-            position=(-0.115, 0)
-        )   
+        self.shaft_text = Text("Scale", origin=(0 , -1), position=(0,0))
+        self.scale_input = InputField(limit_content_to='0123456789:', active=True, position=(0, -0.02))
         
         self.shaft_wrapper = Entity(parent=self.ui, origin=(0,0), position=(0.3, -0.06))
         self.shaft_text.parent = self.shaft_wrapper
-        self.shaft_select_menu.parent = self.shaft_wrapper
+        self.scale_input.parent = self.shaft_wrapper
 
         # Metadata file button
         self.metadata_text = Text("Metadata", x=-0.3, y=-0.2, origin=(0, 0))
