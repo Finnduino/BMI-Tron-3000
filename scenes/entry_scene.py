@@ -8,7 +8,7 @@ from ursina.prefabs.file_browser import FileButton
 from ursina.prefabs.input_field import InputField
 import tkinter as tk
 from tkinter import filedialog
-
+from objGenerator import create_model
 
 KONE_BLUE = color.hex("#1450F5")
 BLACK = color.hex("#141414")
@@ -42,7 +42,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         
         self.select_button = Button(text='Browse File', color=KONE_BLUE, y=0.2, origin=(0, 0))
         self.select_button.fit_to_text()
-        self.select_button.tooltip = Tooltip('Select the input folder to submit all of the inputs at the same time')
+        self.select_button.tooltip = Tooltip('Select the ground floor blueprint')
         self.select_button.on_click = self.open_pdf_dialog
 
 
@@ -203,7 +203,8 @@ class EntryScene(scenes.scene_object.SceneObject):
             self.select_button.fit_to_text()
             print("Selected files:", file_paths)
             for each in file_paths:
-                self.build_building_callback(each,self.elevator_val)
+                create_model(each)
+                self.build_building_callback("calculated.obj",self.elevator_val)
             # Handle the selected files here
 
         #TODO Integrate with our backend
