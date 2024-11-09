@@ -1,15 +1,24 @@
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
-
 import scenes.scene_object
 
 class VisualizerScene(scenes.scene_object.SceneObject):
     def __init__(self):
         super().__init__()
-        self.scene = Entity(scale=(1, 1, 1))
-        # Create a separate entity for UI elements
-        self.ui = Entity(parent=camera.ui)
-
+        ## global variables
+        self.default_floor_opacity = 0.4
+        self.default_floor_color = color.rgba32(16, 128, 255, 255 * self.default_floor_opacity)
+        self.suppressed_floor_opacity = 0.02
+        self.suppressed_floor_color = color.rgba32(16, 128, 255, 255 * self.suppressed_floor_opacity)
+        
+        self.placed_elevator_opacity = 0.95
+        self.placed_elevator_color = color.rgba32(224, 76, 76, 255 * self.placed_elevator_opacity)
+        self.unplaced_elevator_opacity = 0.1
+        self.unplaced_elevator_color = color.rgba32(224, 76, 76, 255 * self.unplaced_elevator_opacity)
+        
+        self.elevator_indicator_opacity = 0.8
+        self.elevator_indicator_color = color.rgba32(255, 0, 0, 255 * self.elevator_indicator_opacity)
+        
         self.spin_button = Button(text='Spin', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.4, color=color.azure)
         self.spin_button.tooltip = Tooltip('Spin the building')
         self.spin_button.on_click = self.spin_building
@@ -30,6 +39,11 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.camera = EditorCamera()  # add camera controls for orbiting and moving the camera
         self.camera.parent = self.scene
         
+        self.elevator_parent = Entity()
+        self.elevator_parent.parent = self.scene
+        self.elevator_parent.enabled = False
+        
+        
         self.is_dragging = False
         self.previous_mouse_position = None
         self.building_parent = self.load_building()
@@ -45,7 +59,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
     def disable(self):
         self.scene.enabled = False
         self.ui.enabled = False
-
+        
     def load_building(self, name: str = None):
         if name:
             Exception("Not implemented")
@@ -54,25 +68,38 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             building_parent = Entity()
             for i in range(10):
                 this_floor = Entity(model='cube', scale=(10, 1, 10), y=i, collider='box')
-                this_floor.color = color.rgba32(16, 128, 255, 255 * 0.4)
+                this_floor.color = self.default_floor_color
                 this_floor.shader = lit_with_shadows_shader
                 floor_array.append(this_floor)
                 this_floor.parent = building_parent
             return building_parent
 
+    def load_elevator(self, cabin: str, shaft: str):
+        """This method is called for loading the elevator model"""
+        cabin = Entity(model = load_model(cabin))
+        shaft = Entity(model = load_model(shaft))
+        cabin.name = "cabin"
+        shaft.name = "shaft"
+        cabin.parent = self.elevator_parent
+        shaft.parent = self.elevator_parent
+        print("models", cabin.model, shaft.model)
+        for child in self.elevator_parent.children:
+            child.shader = lit_with_shadows_shader
+            child.color = color.rgba(0,0,0,0)
+            
+        #TODO scale the cabin and shaft to fit the building
+    
     def place_elevator(self):
         self.done_placing_button.enabled = True
-        elevator = Entity(model='cube', scale=(2, 10, 2), y=5)
-        elevator.color = color.rgba32(0, 0, 0, 0)
-        elevator.shader = lit_with_shadows_shader
+        self.elevator_parent.enabled = True
         elevator_indicator = Entity(model="sphere", scale=1, y=1)
         elevator_indicator.parent = self.building_parent
-        elevator_indicator.color = color.rgba32(255, 0, 0, 0)
-        elevator.parent = elevator_indicator
+        elevator_indicator.color = self.elevator_indicator_color
+        self.elevator_parent.parent = elevator_indicator
         self.placing_elevator = elevator_indicator
 
         for this_floor in self.building_parent.children[1:]:
-            this_floor.animate("color", color.rgba32(16, 128, 255, 255 * 0.02), duration=2, curve=curve.in_out_expo)
+            this_floor.animate("color", self.suppressed_floor_color, duration=2, curve=curve.in_out_expo)
             this_floor.collision = False
 
         self.camera.animate('position', self.building_parent.children[0].position + Vec3(0, 0, 0), duration=2, curve=curve.in_out_expo)
@@ -80,17 +107,26 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.camera.animate('rotation_y', 0, duration=2, curve=curve.in_out_expo)
         self.camera.animate('rotation_z', 0, duration=2, curve=curve.in_out_expo)
         self.camera.animate('target_z', -30, duration=2, curve=curve.in_out_expo)
-        elevator_indicator.animate('color', color.rgba32(255, 0, 0, 255), duration=2, curve=curve.in_out_expo)
-        elevator.animate("color", color.rgba32(224, 76, 76, 255 * 0.1), duration=2, curve=curve.in_out_expo)
+        elevator_indicator.animate('color', self.elevator_indicator_color, duration=2, curve=curve.in_out_expo)
+        for child in self.elevator_parent.children:
+            child.animate("color", self.unplaced_elevator_color, duration=2, curve=curve.in_out_expo)
 
     def done_placing(self):
         self.done_placing_button.enabled = False
         world_position = self.placing_elevator.world_position
         self.placing_elevator.animate("color", color.rgba32(0, 0, 0, 0), duration=2, curve=curve.in_out_expo)
         
-        for child in self.placing_elevator.children:
-            child.animate("color", color.rgba32(224, 76, 76, 255), duration=2, curve=curve.in_out_expo)
-            child.parent = self.building_parent
+        for this_floor in self.building_parent.children[1:]:
+            this_floor.animate("color", self.default_floor_color, duration=2, curve=curve.in_out_expo)
+            this_floor.collision = False
+        
+        # Indicator -> Elevator parent -> Cabin and shaft
+        self.elevator_parent.parent = self.scene
+        
+        for child in self.elevator_parent.children:
+            print(child.name)
+            child.animate("color", self.placed_elevator_color, duration=2, curve=curve.in_out_expo)
+            child.parent = self.elevator_parent
             child.world_position = world_position + child.position
         invoke(self.disable_indicator, delay=2)
         
@@ -113,7 +149,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             self.placing_elevator.animate("position", mouse.world_point, duration=0.5, curve=curve.in_out_expo)
 
     def update(self):
-        print(self.camera.target_z)
+        #print(self.camera.target_z)
         if held_keys['right mouse']:  # Check if right mouse button is held down
             if not self.is_dragging:
                 self.is_dragging = True
