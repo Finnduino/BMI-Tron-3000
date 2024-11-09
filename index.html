@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ursina with Pyodide</title>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js"></script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script type="text/javascript">
+        async function main() {
+            let pyodide = await loadPyodide();
+            await pyodide.loadPackage(['micropip']);
+            await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('ursina')
+from ursina import *
+from ursina.shaders import lit_with_shadows_shader
+
+app = Ursina()
+
+spin_button = Button(text='Spin', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.4, color=color.azure)
+spin_button.tooltip = Tooltip('Spin the building')
+
+place_button = Button(text='Place Elevator', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.3, color=color.azure)
+place_button.tooltip = Tooltip('Place an elevator')
+
+placing_elevator = False
+
+def load_building(name:str=None):
+    if name:
+        Exception("Not implemented")
+    else:
+        floor_array = []
+        building_parent = Entity()
+        for i in range(10):
+            this_floor = Entity(model='cube', scale=(10, 1, 10), y=i, collider='box')
+            this_floor.color = color.rgba32(16, 128, 255, 255 * 0.4)
+            this_floor.shader = lit_with_shadows_shader
+            floor_array.append(this_floor)
+            this_floor.parent = building_parent
+        return building_parent
+
+def place_elevator(building_parent:Entity, camera:EditorCamera):
+    global placing_elevator
+    elevator = Entity(model='cube', scale=(2, 10, 2), y=5)
+    elevator.color = color.rgba32(0, 0, 0, 0)
+    elevator.shader = lit_with_shadows_shader
+    elevator_indicator = Entity(model="sphere", scale=1, y=1)
+    elevator_indicator.color = color.rgba32(255, 0, 0, 0)
+    elevator.parent = elevator_indicator
+    placing_elevator = elevator_indicator
+
+    for this_floor in building_parent.children[1:]:
+        this_floor.animate("color", color.rgba32(16, 128, 255, 255 * 0.02), duration=2, curve=curve.in_out_expo)
+        this_floor.collision = False
+
+    camera.animate('position', building_parent.children[0].position + Vec3(0, 0, 0), duration=2, curve=curve.in_out_expo)
+    camera.animate('rotation_x', 90, duration=2, curve=curve.in_out_expo)
+    camera.animate('rotation_y', 0, duration=2, curve=curve.in_out_expo)
+    camera.animate('rotation_z', 0, duration=2, curve=curve.in_out_expo)
+    camera.animate('target_z', -30, duration=2, curve=curve.in_out_expo)
+    elevator_indicator.animate('color', color.rgba32(255, 0, 0, 255), duration=2, curve=curve.in_out_expo)
+    elevator.animate("color", color.rgba32(224, 76, 76, 255 * 0.1), duration=2, curve=curve.in_out_expo)
+
+def spin(e: Entity):
+    e.animate('rotation_y', e.rotation_y + 360, duration=2, curve=curve.in_out_expo)
+
+camera = EditorCamera()
+
+is_dragging = False
+previous_mouse_position = None
+
+building_parent = load_building()
+
+def spin_building():
+    spin(building_parent)
+
+def place_elevator_call():
+    place_elevator(building_parent, camera)
+
+place_button.on_click = place_elevator_call
+spin_button.on_click = spin_building
+
+def check_click():
+    print("Mouse clicked")
+    global placing_elevator
+    if placing_elevator:
+        print("Placing elevator")
+        placing_elevator.animate("position", mouse.world_point, duration=0.5, curve=curve.in_out_expo)
+
+building_parent.children[0].on_click = check_click
+
+def update():
+    print(camera.target_z)
+    global is_dragging, previous_mouse_position
+    if held_keys['right mouse']:
+        if not is_dragging:
+            is_dragging = True
+            previous_mouse_position = mouse.position
+        else:
+            delta = mouse.position - previous_mouse_position
+            camera.rotation_y += delta.x * 100
+            camera.rotation_x -= delta.y * 100
+            previous_mouse_position = mouse.position
+    else:
+        is_dragging = False
+
+app.run()
+            `);
+        }
+        main();
+    </script>
+</body>
+</html>
