@@ -8,6 +8,7 @@ import json
 import mimetypes
 from io import BytesIO
 import matplotlib.pyplot as plt
+import trimesh
 
 
 def gatherData(file_path):
@@ -136,8 +137,10 @@ def add_polygon(polygon,start_index=0):
         vertices.append((x, y, z))      # Top vertex at z = height
 
     # Define two faces (bottom and top) using vertex indices
-    faces.append([start_index+1, start_index + 2, start_index + 3, start_index + 4])
-
+    faces.append([start_index + 4, start_index + 1, start_index + 2, start_index + 3])
+    faces.append([start_index + 1, start_index + 4, start_index + 3, start_index + 2])
+    #faces.append([start_index + 2, start_index + 3, start_index + 4, start_index + 1])
+    #faces.append([start_index + 3, start_index + 2, start_index + 1, start_index + 4])
 
 def createOBJFile(name,data,floor_height=10,floor_start_height=0):
 
