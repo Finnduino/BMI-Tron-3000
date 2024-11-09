@@ -5,6 +5,7 @@ import scenes.scene_object
 class VisualizerScene(scenes.scene_object.SceneObject):
     def __init__(self):
         super().__init__()
+        
         ## global variables
         self.default_floor_opacity = 0.4
         self.default_floor_color = color.rgba32(16, 128, 255, 255 * self.default_floor_opacity)
@@ -46,9 +47,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         
         self.is_dragging = False
         self.previous_mouse_position = None
-        self.building_parent = self.load_building()
-        self.building_parent.parent = self.scene
-        self.building_parent.children[0].on_click = self.check_click
+        self.building_parent = None
         self.scene.enabled = False
         self.ui.enabled = False
 
@@ -59,25 +58,38 @@ class VisualizerScene(scenes.scene_object.SceneObject):
     def disable(self):
         self.scene.enabled = False
         self.ui.enabled = False
-        
+    
     def load_building(self, name: str = None):
+        floor_array = []
+        building_parent = Entity()
         if name:
-            Exception("Not implemented")
+            for i in range(10):
+                this_floor = Entity(model=f'floor{i}.obj', y=i, collider='box')
+                this_floor.scale = (0.1, 0.5, 0.1)
+                this_floor.color = self.default_floor_color
+                this_floor.shader = lit_with_shadows_shader
+                floor_array.append(this_floor)
+                this_floor.parent = building_parent
+            building_parent.enabled = True
         else:
-            floor_array = []
-            building_parent = Entity()
             for i in range(10):
                 this_floor = Entity(model='cube', scale=(10, 1, 10), y=i, collider='box')
                 this_floor.color = self.default_floor_color
                 this_floor.shader = lit_with_shadows_shader
                 floor_array.append(this_floor)
                 this_floor.parent = building_parent
-            return building_parent
+        building_parent.children[0].on_click = self.check_click
+        building_parent.parent = self.scene
+        self.building_parent = building_parent
+        return building_parent
 
-    def load_elevator(self, cabin: str, shaft: str):
+    def load_elevator(self, cabin_: str, shaft_: str):
         """This method is called for loading the elevator model"""
-        cabin = Entity(model = load_model(cabin))
-        shaft = Entity(model = load_model(shaft))
+        print("Loading elevator", cabin_, shaft_)
+        cabin_path = Path(f"models\\{cabin_}")
+        shaft_path = Path(f"models\\{shaft_}")
+        cabin = Entity(model = load_model("elevator", path=cabin_path))
+        shaft = Entity(model = load_model("shaft", path = shaft_path))
         cabin.name = "cabin"
         shaft.name = "shaft"
         cabin.parent = self.elevator_parent
