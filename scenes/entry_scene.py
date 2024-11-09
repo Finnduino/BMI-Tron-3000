@@ -16,8 +16,9 @@ WHITE = color.hex("#FFFFFF")
 
 
 class EntryScene(scenes.scene_object.SceneObject):
-    def __init__(self):
+    def __init__(self, dev=False):
         super().__init__()
+        self.dev = dev
         self.scene = Entity()
         self.scene.enabled = False
 
@@ -92,8 +93,13 @@ class EntryScene(scenes.scene_object.SceneObject):
     
         self.load_button.tooltip = Tooltip('Load world')
         self.load_button.on_click = self.select_button_macro
-    
-    
+
+        if self.dev:
+            self.default_load = Button(text='Load default', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.2)
+            self.default_load.fit_to_text()
+            self.default_load.parent = self.ui
+            self.default_load.tooltip = Tooltip('Load default')
+            self.default_load.on_click = lambda: self.build_building_callback(None)
         
     
     def select_button_macro(self):
@@ -139,4 +145,4 @@ class EntryScene(scenes.scene_object.SceneObject):
             
         #TODO Integrate with our backend
         #For now, it calls with the default values, resulting in the default building
-        self.build_building_callback(None)
+        self.build_building_callback("Default")

@@ -5,7 +5,7 @@ from scenes.entry_scene import EntryScene
 from scenes.visualizer import VisualizerScene
 app = Ursina()
 
-entry_scene = EntryScene()
+entry_scene = EntryScene(dev=True)
 visualizer_scene = VisualizerScene()
 
 def switch_to_visualizer():
