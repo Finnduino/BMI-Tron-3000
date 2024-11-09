@@ -10,10 +10,8 @@ from io import BytesIO
 import matplotlib.pyplot as plt
 
 
-
 def gatherData(file_path):
     # Replace "your_image.jpg" with your actual file path
-
     boundary = "----011000010111000001101001"
 
     # Open the file and read the binary data
@@ -28,9 +26,7 @@ def gatherData(file_path):
     payload.write(file_data)
     payload.write(f"\r\n--{boundary}--\r\n".encode())
 
-
-
-    with open('data/keysAndStuff.json') as f:
+    with open('../data/keysAndStuff.json') as f:
         data = json.load(f)
         API_KEY = data['rasterscan']
 
@@ -61,9 +57,8 @@ def plot2dWith(data):
     #print(data['walls'])
 
     for each in data['walls']:
-
         walls.append(each["position"])  # x y z
-        walls.append(each["position"])
+
     doors=[]
     for door in data['doors']:
         doors.append(door["bbox"])
@@ -84,7 +79,7 @@ def plot2dWith(data):
 
     # Add door polygons with a distinct color
     door_collection = Poly3DCollection(door_polygons, color="brown", edgecolor="black", alpha=1)
-    ax.add_collection3d(door_collection)
+    #ax.add_collection3d(door_collection)
 
     # List to store the wall polygons
     polygons = []
@@ -121,9 +116,88 @@ def plot2dWith(data):
     # Display the plot
     plt.show()
 
-
-
 #data=gatherData("data/floorplan-apartment-ground-floor.png")
-#print(data)
-data=exampledata_mediumStrongWalls
-plot2dWith(data)
+
+
+# Initialize lists to hold vertices and faces
+vertices = []
+faces = []
+#important  ^^
+
+# Function to add a quadrilateral polygon to vertices and faces
+def add_polygon(polygon,start_index=0):
+    #start_index = len(vertices)   # Index starts from current length + 1
+
+    # Define the four vertices for the polygon's base and top
+    for each in polygon:
+        x=each[0]
+        y=each[1]
+        z=each[2]
+        vertices.append((x, y, z))      # Top vertex at z = height
+
+    # Define two faces (bottom and top) using vertex indices
+    faces.append([start_index+1, start_index + 2, start_index + 3, start_index + 4])
+
+
+def createOBJFile(data,floor_height=10,floor_start_height=0):
+
+    walls =[]
+    index=0
+
+
+    fileCount=0
+    for file in data:
+        for each in file['walls']:
+            walls.append(each["position"])
+        # List to store the wall polygons
+        polygons = []
+
+        # Create 3D wall polygons for each wall segment
+
+        for wall in walls:
+            # Get the start and end point of the wall segment
+            (x1, y1), (x2, y2) = wall
+
+            # Define the four corners of the wall polygon
+            polygon = [
+                [x1/10, y1/10, floor_start_height+floor_height*fileCount],  # Bottom point 1
+                [x2/10, y2/10, floor_start_height+floor_height*fileCount],  # Bottom point 2
+                [x2/10, y2/10,floor_start_height+floor_height*(fileCount+1)],  # Top point 2
+                [x1/10, y1/10, floor_start_height+floor_height*(fileCount+1)]   # Top point 1
+            ]
+            polygons.append(polygon)
+
+        for each in polygons:
+            add_polygon(each, index)
+            index+=4
+
+        # Add floor faces
+        """"
+        #floor_vertices = [v for v in vertices[-4*len(polygons):]]
+        bottom_face = [index - 4*len(polygons) + i for i in range(1, 4*len(polygons)+1, 4)]
+        top_face = [index - 4*len(polygons) + i + 2 for i in range(1, 4*len(polygons)+1, 4)]
+        faces.append(bottom_face)
+        faces.append(top_face)
+        """
+
+        fileCount+=1
+
+    # Write the vertices and faces to an .obj file
+    with open("structure.obj", "w") as file:
+        # Write vertices
+        for vertex in vertices:
+            file.write(f"v {vertex[0]} {vertex[2]} {vertex[1]}\n")
+
+        # Write faces (1-indexed in .obj format)
+        for face in faces:
+            file.write(f"f {' '.join(map(str, face))}\n")
+
+
+file1=gatherData("../data/sit2_f1.jpg")
+file2=gatherData("../data/sit2_f2.jpg")
+file3=gatherData("../data/sit2_f3.jpg")
+joint=[file1,file2,file3]
+# can make only one floor if passed list containing one element
+createOBJFile(joint,2,0)
+
+#plot2dWith(exampledata_mediumStrongWalls)
