@@ -25,7 +25,7 @@ def create_model(path_of_image: str):
                 for point in result["points"]:
                     twoD_points.append([point["x"], point["y"]])
                 polygon = ShapePolygon(twoD_points)
-                mesh = trimesh.creation.extrude_polygon(polygon, 1)
+                mesh = trimesh.creation.extrude_polygon(polygon, 3.05*30)
                 culled_results.append(mesh)
     
     done_mesh = trimesh.util.concatenate(culled_results)
@@ -34,6 +34,9 @@ def create_model(path_of_image: str):
     center = [0, 0, 0]
     rotat = trimesh.transformations.rotation_matrix(angle, direction, center)
     done_mesh.apply_transform(rotat)
+
+    scale = trimesh.transformations.scale_matrix(1/30)
+    done_mesh.apply_transform(scale)
     done_mesh.export("calculated.obj")
     
     print(results)
