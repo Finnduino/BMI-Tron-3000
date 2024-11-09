@@ -20,6 +20,12 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.place_button.on_click = self.place_elevator_call
         self.place_button.parent = self.ui
         
+        self.done_placing_button = Button(text='Done Placing', scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.2, color=color.azure)
+        self.done_placing_button.tooltip = Tooltip('Done placing the elevator')
+        self.done_placing_button.on_click = self.done_placing
+        self.done_placing_button.parent = self.ui
+        self.done_placing_button.enabled = False
+        
         self.placing_elevator = False
         self.camera = EditorCamera()  # add camera controls for orbiting and moving the camera
         self.camera.parent = self.scene
@@ -32,7 +38,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.scene.enabled = False
         self.ui.enabled = False
 
-    def enable(self):
+    def enable(self):   
         self.scene.enabled = True
         self.ui.enabled = True
 
@@ -55,6 +61,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             return building_parent
 
     def place_elevator(self):
+        self.done_placing_button.enabled = True
         elevator = Entity(model='cube', scale=(2, 10, 2), y=5)
         elevator.color = color.rgba32(0, 0, 0, 0)
         elevator.shader = lit_with_shadows_shader
@@ -76,6 +83,17 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         elevator_indicator.animate('color', color.rgba32(255, 0, 0, 255), duration=2, curve=curve.in_out_expo)
         elevator.animate("color", color.rgba32(224, 76, 76, 255 * 0.1), duration=2, curve=curve.in_out_expo)
 
+    def done_placing(self):
+        self.done_placing_button.enabled = False
+        world_position = self.placing_elevator.world_position
+        self.placing_elevator.animate("color", color.rgba32(0, 0, 0, 0), duration=2, curve=curve.in_out_expo)
+        
+        for child in self.placing_elevator.children:
+            child.animate("color", color.rgba32(224, 76, 76, 255), duration=2, curve=curve.in_out_expo)
+            child.parent = self.building_parent
+            child.world_position = world_position + child.position
+        invoke(self.disable_indicator, delay=2)
+        
     def spin(self, e: Entity):
         e.animate('rotation_y', e.rotation_y + 360, duration=2, curve=curve.in_out_expo)
 
@@ -85,6 +103,9 @@ class VisualizerScene(scenes.scene_object.SceneObject):
     def place_elevator_call(self):
         self.place_elevator()
 
+    def disable_indicator(self):
+        self.placing_elevator.enabled = False
+    
     def check_click(self):
         print("Mouse clicked")
         if self.placing_elevator:
