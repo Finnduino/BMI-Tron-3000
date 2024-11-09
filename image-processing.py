@@ -16,9 +16,12 @@ def floor_plan_to_opencv_image(path: str):
         logger.warning("More than 1 page found, ignoring everything but the first page")
     return np.array(pdf_pages[0])[:, :, ::-1]
 
+def to_grayscale(image):
+    return cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+
 def main():
     init()
-    opencv_image = floor_plan_to_opencv_image("floor_1.pdf")
+    opencv_image = to_grayscale(floor_plan_to_opencv_image("floor_1.pdf"))
     logger.info("started writing")
     cv.imwrite("floor_1.png", opencv_image)
     logger.info("finished writing")
