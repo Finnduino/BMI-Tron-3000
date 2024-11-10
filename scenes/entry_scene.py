@@ -37,6 +37,8 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.move_to_manual_editor_callback = None
         
         self.autofill_title = Text("Submit all of the inputs at the same time", position=(0, 0.3), origin=(0, 0))
+
+        self.files_selected=0
         
         self.select_button = Button(text='Browse File', color=KONE_BLUE, y=0.2, origin=(0, 0))
         self.select_button.fit_to_text()
@@ -46,6 +48,7 @@ class EntryScene(scenes.scene_object.SceneObject):
 
 
         self.load_save_button = Button(text='Load Save File', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.3)
+        self.load_save_button.fit_to_text()
         self.load_save_button.tooltip = Tooltip('Load a saved state')
         self.load_save_button.on_click = self.load_save_file
         self.load_save_button.parent = self.ui
@@ -136,7 +139,7 @@ class EntryScene(scenes.scene_object.SceneObject):
     
     def subscribe_to_open_manual_editor(self, methodname):
         self.move_to_manual_editor_callback = methodname
-    
+
 
 
     def select_model(self, cabin: str = "elevatorOne", shaft : str = "shaftOne"):
@@ -189,6 +192,10 @@ class EntryScene(scenes.scene_object.SceneObject):
         root.withdraw()  # Hide the root window
         file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf"),("OBJ files", "*.obj"),("Image files", "*.png;*.jpg;*.jpeg")])
         if file_paths:
+            self.files_selected = self.files_selected+1
+
+            self.select_button.text=f"Browse File ({self.files_selected} files selected)"
+            self.select_button.fit_to_text()
             print("Selected files:", file_paths)
             for each in file_paths:
                 self.build_building_callback(each,self.elevator_val)
