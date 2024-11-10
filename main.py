@@ -34,13 +34,16 @@ def found_model(cabin : str, shaft: str):
     print("Found model", cabin, shaft)
     visualizer_scene.load_elevator(cabin, shaft)
 
-
+def load_manual_building():
+    visualizer_scene.load_building("manual.obj")
+    switch_to_visualizer()
+    
 # Subscription to events
 entry_scene.subscribe_to_move_to_visualizer(switch_to_visualizer)
 entry_scene.subscribe_to_elevator(found_model)
 entry_scene.subscribe_to_build_building(build_house)
 entry_scene.subscribe_to_open_manual_editor(switch_to_manual_editor)
-
+manual_editor_scene.subscribe_to_move_to_visualizer(load_manual_building)
 entry_scene.enable()
 visualizer_scene.disable()
 manual_editor_scene.disable()
