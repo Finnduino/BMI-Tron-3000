@@ -72,7 +72,9 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             
             if name=="manual.obj":
                 for i in range(10):
-                    this_floor = Entity(model='demo.obj', scale=(10, 1, 10), y=i, collider='box')
+                    this_floor = Entity(model='demo.obj', y=i, collider='box')
+                    this_floor.rotate((90,0,0))
+                    this_floor.scale = (10, 10, 1)
                     this_floor.color = self.default_floor_color
                     this_floor.shader = lit_with_shadows_shader
                     floor_array.append(this_floor)
