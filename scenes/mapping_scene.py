@@ -8,7 +8,6 @@ from tkinter import filedialog
 import PIL
 from ursina.shaders import basic_lighting_shader
 import trimesh
-from shapely.geometry import Polygon as ShapePolygon
 class ManualEditor(scenes.scene_object.SceneObject):
     def __init__(self):
         super().__init__()

@@ -1,3 +1,5 @@
+import json
+
 from ursina import *
 import scenes.scene_object
 from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
@@ -39,6 +41,14 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.select_button.fit_to_text()
         self.select_button.tooltip = Tooltip('Select the input folder to submit all of the inputs at the same time')
         self.select_button.on_click = self.open_pdf_dialog
+
+
+
+        self.load_save_button = Button(text='Load Save File', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.3)
+        self.load_save_button.tooltip = Tooltip('Load a saved state')
+        self.load_save_button.on_click = self.load_save_file
+        self.load_save_button.parent = self.ui
+
 
 
         self.title = Text("Or submit the files Individually", position=(0, 0.1), origin=(0, 0))
@@ -101,7 +111,7 @@ class EntryScene(scenes.scene_object.SceneObject):
             self.default_load.parent = self.ui
             self.default_load.tooltip = Tooltip('Load default')
             self.default_load.on_click = lambda: self.build_building_callback("Default")
-        
+
     
     def select_button_macro(self):
         self.move_to_visualizer_callback()
@@ -131,6 +141,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         #    path = "\\models\\"
         #    self.found_elevator_callback(path+cabin, path+shaft)
         # Here you can add the logic to select and load a 3D model
+
     
     def select_building(self):
         """This method is called for selecting the building model"""
@@ -140,18 +151,39 @@ class EntryScene(scenes.scene_object.SceneObject):
     
     def select_floor(self):
         """This method is called for each floor selected"""
+
+    def load_save_file(self):
+        root = tk.Tk()
+        root.withdraw()  # Hide the root window
+        file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+        if file_path:
+            with open(file_path, 'r') as f:
+                data = json.load(f)
+            self.apply_loaded_data(data)
+
+    def apply_loaded_data(self, data):
+        # Example implementation to apply loaded data
+        input_files = data.get('input_files', [])
+        elevator_position = data.get('elevator_position', None)
+
+        for file_path in input_files:
+            self.build_building_callback(file_path)
+
+        if elevator_position:
+            print("Elevator position should be changed ?")
+
         
     def open_pdf_dialog(self):
         """Open a file dialog to select multiple PDF files"""
         root = tk.Tk()
         root.withdraw()  # Hide the root window
-        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf"),("OBJ files", "*.obj")])
+        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf"),("OBJ files", "*.obj"),("Image files", "*.png;*.jpg;*.jpeg")])
         if file_paths:
             print("Selected files:", file_paths)
             for each in file_paths:
                 self.build_building_callback(each)
             # Handle the selected files here
-            
+
         #TODO Integrate with our backend
         #For now, it calls with the default values, resulting in the default building
         #self.build_building_callback("Default")
