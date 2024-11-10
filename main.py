@@ -13,6 +13,9 @@ def switch_to_visualizer():
     entry_scene.disable()
     visualizer_scene.enable()
     manual_editor_scene.disable()
+    visualizer_scene.camera = EditorCamera()
+    visualizer_scene.camera.parent = visualizer_scene.scene
+
     
     
 def switch_to_entry():
@@ -36,6 +39,7 @@ def found_model(cabin : str, shaft: str):
 
 def load_manual_building():
     visualizer_scene.load_building("manual.obj")
+    manual_editor_scene.disable()
     switch_to_visualizer()
     
 # Subscription to events

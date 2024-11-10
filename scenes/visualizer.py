@@ -69,12 +69,23 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         floor_array = []
         building_parent = Entity()
         if name:
-            if not name=="Default":
+            
+            if name=="manual.obj":
+                for i in range(10):
+                    this_floor = Entity(model='demo.obj', scale=(10, 1, 10), y=i, collider='box')
+                    this_floor.color = self.default_floor_color
+                    this_floor.shader = lit_with_shadows_shader
+                    floor_array.append(this_floor)
+                    floor_array.append(this_floor)
+                    floor_array.append(this_floor)
+                    this_floor.parent = building_parent
+                    
+            elif not name=="Default":
                 last=name.split("/")[-1]
                 fFormat=last.split(".")[-1]
 
                 if fFormat=="obj":
-                    last = hacky_test_stuff.gatherFileDataFromAndReturnOBJ(name, last)
+                    last = hacky_test_stuff.fileGeneration.gatherFileDataFromAndReturnABJ(name, last)
 
 
                 floor=Entity(model=last, scale=(0.5, 1, 0.5), y=self.heightCounter, collider='box')
@@ -85,6 +96,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
                 floor_array.append(floor)
                 floor.parent = building_parent
 
+            
             else:
                 for i in range(4):
                     this_floor = Entity(model=f'floor{i}.obj', y=i, collider='box')
