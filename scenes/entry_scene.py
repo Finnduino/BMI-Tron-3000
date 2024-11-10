@@ -65,6 +65,8 @@ class EntryScene(scenes.scene_object.SceneObject):
             DropdownMenuButton("Model 3", on_click=lambda: self.select_model("Three", "Three")),
         ), x=-0.115, y=0)
 
+
+
         self.eleveator_wrapper = Entity(parent=self.ui, origin=(0,0), position=(-0.3, -0.06))
         self.elevator_text.parent = self.eleveator_wrapper
         self.elevator_success.parent = self.eleveator_wrapper
@@ -87,9 +89,11 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.metadata_fb.on_click = lambda: self.move_to_manual_editor_callback()
 
         # Floor plans file button
+        """"
         self.floor_plans_text = Text("Floor Plans", x=0.3, y=-0.2, origin=(0, 0))
         self.floor_plans_fb = Button(text='Browse File', color=KONE_BLUE, x=0.3, y=-0.26, origin=(0, 0))
         self.floor_plans_fb.fit_to_text()
+        """
 
         # Add every entity to the scene
         self.autofill_title.parent = self.ui
@@ -97,8 +101,11 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.title.parent = self.ui
         self.metadata_text.parent = self.ui
         self.metadata_fb.parent = self.ui
+
+        """"
         self.floor_plans_text.parent = self.ui
         self.floor_plans_fb.parent = self.ui
+        """
     
         self.load_button = Button(text='Load world', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.4)
         self.load_button.fit_to_text()
@@ -107,9 +114,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.load_button.tooltip = Tooltip('Load world')
         self.load_button.on_click = self.select_button_macro
 
-
         self.elevator_val = 1 #default value
-
 
         if self.dev:
             self.default_load = Button(text='Load default', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.2)
@@ -117,8 +122,6 @@ class EntryScene(scenes.scene_object.SceneObject):
             self.default_load.parent = self.ui
             self.default_load.tooltip = Tooltip('Load default')
             self.default_load.on_click = lambda: self.build_building_callback("Default", self.elevator_val)
-
-
 
     
     def select_button_macro(self):
@@ -148,6 +151,8 @@ class EntryScene(scenes.scene_object.SceneObject):
         if cabin == "One": self.elevator_val = 1
         elif cabin == "Two": self.elevator_val = 2
         elif cabin == "Three": self.elevator_val = 3
+
+        self.elevator_select_menu.text = cabin
 
         self.found_elevator_callback(cabin, shaft)
         #if os.path.exists(f"\\models\\{cabin}") and os.path.exists(f"\\models\\{shaft}"):
@@ -185,7 +190,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         if elevator_position:
             print("Elevator position should be changed ?")
 
-        
+
     def open_pdf_dialog(self):
         """Open a file dialog to select multiple PDF files"""
         root = tk.Tk()
