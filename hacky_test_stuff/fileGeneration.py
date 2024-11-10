@@ -246,7 +246,7 @@ def getElevatorData(site):
     return data
     floors=data["Number_of_floors"][0]
     height=data["Elevators"]["Floor_to_floor_height_mm"][0]
-    floorHeight=height/floors
+    floorHeight=height/(floors*10)
     return floorHeight
 
 def gatherFileDataFromAndReturnABJ(file_path, filename,elevatorNumber):
