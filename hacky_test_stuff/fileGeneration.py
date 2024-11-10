@@ -121,36 +121,39 @@ def plot2dWith(data):
 
 
 # Initialize lists to hold vertices and faces
-vertices = []
-faces = []
 #important  ^^
 
 # Function to add a quadrilateral polygon to vertices and faces
-def add_polygon(polygon,start_index=0):
-    #start_index = len(vertices)   # Index starts from current length + 1
-
-    # Define the four vertices for the polygon's base and top
-    for each in polygon:
-        x=each[0]
-        y=each[1]
-        z=each[2]
-        vertices.append((x, y, z))      # Top vertex at z = height
-
-    # Define two faces (bottom and top) using vertex indices
-    faces.append([start_index + 4, start_index + 1, start_index + 2, start_index + 3])
-    faces.append([start_index + 1, start_index + 4, start_index + 3, start_index + 2])
-    #faces.append([start_index + 2, start_index + 3, start_index + 4, start_index + 1])
-    #faces.append([start_index + 3, start_index + 2, start_index + 1, start_index + 4])
 
 def createOBJFile(name,data,floor_height=10,floor_start_height=0):
+    vertices = []
+    faces = []
 
     walls =[]
     index=0
+    bottomPolygons = []
+
+    def add_polygon(polygon,start_index=0):
+        #start_index = len(vertices)   # Index starts from current length + 1
+
+        # Define the four vertices for the polygon's base and top
+        for each in polygon:
+            x=each[0]
+            y=each[1]
+            z=each[2]
+            vertices.append((x, y, z))      # Top vertex at z = height
+
+        # Define two faces (bottom and top) using vertex indices
+        faces.append([start_index + 4, start_index + 1, start_index + 2, start_index + 3])
+        faces.append([start_index + 1, start_index + 4, start_index + 3, start_index + 2])
+        #faces.append([start_index + 2, start_index + 3, start_index + 4, start_index + 1])
+        #faces.append([start_index + 3, start_index + 2, start_index + 1, start_index + 4])
 
     for each in data['walls']:
         walls.append(each["position"])
         # List to store the wall polygons
         polygons = []
+
 
         # Create 3D wall polygons for each wall segment
 
@@ -158,6 +161,7 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
             # Get the start and end point of the wall segment
             (x1, y1), (x2, y2) = wall
             offset=10
+
 
             # Define the four corners of the wall polygon
             polygon1 = [
@@ -173,13 +177,24 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
                 [x2/20-offset, y2/20-offset,floor_start_height+floor_height],  # Top point 2
                 [x1/20-offset, y1/20-offset, floor_start_height+floor_height]   # Top point 1
             ]
-
+            bottomPolygons.append([x1/20-offset, y1/20-offset, floor_start_height])
+            bottomPolygons.append([x2/20-offset, y2/20-offset, floor_start_height])
             polygons.append(polygon1)
             polygons.append(polygon2)
 
     for each in polygons:
             add_polygon(each, index)
             index+=4
+
+    import trimesh
+
+        # Calculate floor vertices (assuming the floor is at the same height as the wall bottom points)
+    floor_vertices = bottomPolygons
+
+        # Calculate floor faces (assuming the points form a closed loop)
+    num_vertices = len(floor_vertices)
+    floor_faces = [[i, (i + 1) % num_vertices, (i + 1) % num_vertices, i] for i in range(num_vertices)]
+
 
 
 
@@ -193,11 +208,29 @@ def createOBJFile(name,data,floor_height=10,floor_start_height=0):
         for face in faces:
             file.write(f"f {' '.join(map(str, face))}\n")
 
+        for face in floor_faces:
+            file.write(f"f {' '.join(map(str, face))}\n")
+
+
+        def generate_pattern(från,n):
+            pattern = []
+            i = från
+            while i < n:
+                if i + 1 < n:
+                    pattern.append(f"{i} {i+1}")
+                i += 4
+            #print(pattern)
+            return pattern
+
+        file.write(f"f {' '.join(generate_pattern(1,len(vertices)))}\n")
+
+    return name
 
 #file1=gatherData("../data/sit2_f1.jpg")
 #file2=gatherData("../data/sit2_f2.jpg")
 #file3=gatherData("../data/sit2_f3.jpg")
 #joint=[file1,file2,file3]
+
 tmpdata=[{'walls':[{'position': [[262, 246], [538, 246]]}, {'position': [[121, 246], [262, 246]]}, {'position': [[262, 246], [262, 274]]}, {'position': [[538, 246], [538, 308]]}, {'position': [[121, 246], [121, 407]]}, {'position': [[262, 274], [343, 274]]}, {'position': [[613, 277], [704, 315]]}, {'position': [[487, 308], [538, 308]]}, {'position': [[48, 301], [48, 442]]}, {'position': [[538, 308], [538, 377]]}, {'position': [[132, 324], [174, 324]]}, {'position': [[704, 315], [704, 394]]}, {'position': [[174, 324], [174, 407]]}, {'position': [[121, 407], [174, 407]]}, {'position': [[48, 415], [48, 442]]}, {'position': [[487, 438], [539, 438]]}, {'position': [[48, 442], [48, 569]]}, {'position': [[539, 438], [539, 589]]}, {'position': [[187, 562], [284, 562]]}, {'position': [[187, 562], [187, 588]]}, {'position': [[121, 588], [187, 588]]}, {'position': [[482, 589], [539, 589]]}, {'position': [[121, 407], [121, 588]]}, {'position': [[487, 308], [487, 438]]}]},{'walls':[{'position': [[178, 13], [281, 13]]}, {'position': [[11, 13], [178, 13]]}, {'position': [[281, 13], [449, 13]]}, {'position': [[449, 13], [507, 13]]}, {'position': [[449, 13], [449, 61]]}, {'position': [[178, 13], [178, 51]]}, {'position': [[281, 13], [281, 51]]}, {'position': [[11, 13], [11, 104]]}, {'position': [[507, 13], [507, 84]]}, {'position': [[100, 38], [100, 71]]}, {'position': [[178, 51], [281, 51]]}, {'position': [[100, 71], [138, 71]]}, {'position': [[452, 84], [507, 84]]}, {'position': [[452, 84], [452, 240]]}, {'position': [[11, 104], [71, 104]]}, {'position': [[11, 104], [11, 204]]}, {'position': [[71, 104], [71, 160]]}, {'position': [[281, 110], [281, 175]]}, {'position': [[71, 160], [103, 160]]}, {'position': [[71, 160], [71, 204]]}, {'position': [[179, 175], [281, 175]]}, {'position': [[281, 175], [327, 175]]}, {'position': [[11, 204], [71, 204]]}, {'position': [[452, 240], [507, 240]]}, {'position': [[507, 240], [507, 419]]}, {'position': [[177, 259], [177, 384]]}, {'position': [[265, 281], [340, 281]]}, {'position': [[340, 281], [340, 359]]}, {'position': [[11, 320], [53, 320]]}, {'position': [[11, 320], [11, 425]]}, {'position': [[177, 384], [431, 384]]}, {'position': [[431, 384], [431, 419]]}, {'position': [[89, 384], [89, 425]]}, {'position': [[11, 425], [89, 425]]}, {'position': [[431, 419], [507, 419]]}, {'position': [[89, 425], [127, 425]]}, {'position': [[89, 384], [177, 384]]}, {'position': [[11, 204], [11, 320]]}, {'position': [[507, 84], [507, 240]]}]},{'walls':[{'position': [[178, 14], [281, 14]]}, {'position': [[11, 14], [178, 14]]}, {'position': [[281, 14], [449, 14]]}, {'position': [[449, 14], [512, 14]]}, {'position': [[178, 14], [178, 47]]}, {'position': [[281, 14], [281, 47]]}, {'position': [[449, 14], [449, 61]]}, {'position': [[512, 14], [512, 83]]}, {'position': [[11, 14], [11, 105]]}, {'position': [[178, 47], [281, 47]]}, {'position': [[459, 83], [512, 83]]}, {'position': [[512, 83], [459, 144]]}, {'position': [[459, 83], [459, 144]]}, {'position': [[11, 105], [71, 105]]}, {'position': [[71, 105], [71, 159]]}, {'position': [[11, 105], [11, 204]]}, {'position': [[459, 144], [459, 239]]}, {'position': [[71, 159], [108, 159]]}, {'position': [[71, 159], [71, 204]]}, {'position': [[11, 204], [71, 204]]}, {'position': [[11, 204], [11, 320]]}, {'position': [[459, 239], [511, 239]]}, {'position': [[511, 239], [511, 423]]}, {'position': [[300, 251], [300, 278]]}, {'position': [[277, 278], [300, 278]]}, {'position': [[300, 278], [339, 278]]}, {'position': [[339, 278], [339, 356]]}, {'position': [[61, 283], [61, 320]]}, {'position': [[11, 320], [61, 320]]}, {'position': [[11, 320], [11, 424]]}, {'position': [[88, 383], [177, 383]]}, {'position': [[177, 383], [432, 383]]}, {'position': [[88, 383], [88, 424]]}, {'position': [[432, 383], [432, 423]]}, {'position': [[432, 423], [511, 423]]}, {'position': [[11, 424], [88, 424]]}, {'position': [[88, 424], [126, 424]]}, {'position': [[177, 262], [177, 383]]}]}]
 
 
@@ -206,3 +239,10 @@ createOBJFile('floor1.obj',tmpdata[0],2,0)
 createOBJFile('floor2.obj',tmpdata[1],2,0)
 createOBJFile('floor3.obj',tmpdata[2],2,0)
 
+
+
+def gatherFileDataFromAndReturnOBJ(file_path,filename):
+    print("Called")
+    data=gatherData(file_path)
+    createOBJFile('floor1.obj',data,2,0)
+    return filename+".obj"
