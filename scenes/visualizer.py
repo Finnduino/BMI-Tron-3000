@@ -1,6 +1,7 @@
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
 import scenes.scene_object
+import hacky_test_stuff.fileGeneration
 
 class VisualizerScene(scenes.scene_object.SceneObject):
     def __init__(self):
@@ -51,6 +52,8 @@ class VisualizerScene(scenes.scene_object.SceneObject):
         self.scene.enabled = False
         self.ui.enabled = False
 
+        self.heightCounter=0
+
     def enable(self):   
         self.scene.enabled = True
         self.ui.enabled = True
@@ -58,19 +61,41 @@ class VisualizerScene(scenes.scene_object.SceneObject):
     def disable(self):
         self.scene.enabled = False
         self.ui.enabled = False
-    
+
+
+
+
     def load_building(self, name: str = None):
         floor_array = []
         building_parent = Entity()
         if name:
-            for i in range(4):
-                this_floor = Entity(model=f'floor{i}.obj', y=i, collider='box')
-                this_floor.scale = (0.1, 0.5, 0.1)
-                this_floor.color = self.default_floor_color
-                this_floor.shader = lit_with_shadows_shader
-                floor_array.append(this_floor)
-                this_floor.parent = building_parent
+            if not name=="Default":
+                last=name.split("/")[-1]
+                fFormat=last.split(".")[-1]
+
+                if fFormat=="obj":
+                    last = hacky_test_stuff.gatherFileDataFromAndReturnOBJ(name, last)
+
+
+                floor=Entity(model=last, scale=(0.5, 1, 0.5), y=self.heightCounter, collider='box')
+                self.heightCounter+=2
+                print("heightCounter",self.heightCounter)
+                floor.color = self.default_floor_color
+                floor.shader = lit_with_shadows_shader
+                floor_array.append(floor)
+                floor.parent = building_parent
+
+            else:
+                for i in range(4):
+                    this_floor = Entity(model=f'floor{i}.obj', y=i, collider='box')
+                    this_floor.scale = (0.5, 1, 0.5)
+                    this_floor.color = self.default_floor_color
+                    this_floor.shader = lit_with_shadows_shader
+                    floor_array.append(this_floor)
+                    this_floor.parent = building_parent
             building_parent.enabled = True
+
+
         else:
             for i in range(10):
                 this_floor = Entity(model='cube', scale=(10, 1, 10), y=i, collider='box')
@@ -80,10 +105,13 @@ class VisualizerScene(scenes.scene_object.SceneObject):
                 floor_array.append(this_floor)
                 floor_array.append(this_floor)
                 this_floor.parent = building_parent
+
         building_parent.children[0].on_click = self.check_click
         building_parent.parent = self.scene
         self.building_parent = building_parent
         return building_parent
+
+
 
     def load_elevator(self, cabin_: str, shaft_: str):
         """This method is called for loading the elevator model"""

@@ -56,7 +56,9 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.elevator_text.parent = self.eleveator_wrapper
         self.elevator_success.parent = self.eleveator_wrapper
         self.elevator_select_menu.parent = self.eleveator_wrapper
-        
+        #contains the paths of the selected files
+        self.seleceted_files=[]
+
         # Add the shaft model dropdown menu
         self.shaft_text = Text("Scale", origin=(0 , -1), position=(0,0))
         self.scale_input = InputField(limit_content_to='0123456789:', active=True, position=(0, -0.02))
@@ -96,7 +98,7 @@ class EntryScene(scenes.scene_object.SceneObject):
             self.default_load.fit_to_text()
             self.default_load.parent = self.ui
             self.default_load.tooltip = Tooltip('Load default')
-            self.default_load.on_click = lambda: self.build_building_callback(None)
+            self.default_load.on_click = lambda: self.build_building_callback("Default")
         
     
     def select_button_macro(self):
@@ -127,6 +129,8 @@ class EntryScene(scenes.scene_object.SceneObject):
     def select_building(self):
         """This method is called for selecting the building model"""
         # Here you can add the logic to select and load a building model
+        for each in self.selected_files:
+            self.build_building_callback
     
     def select_floor(self):
         """This method is called for each floor selected"""
@@ -135,11 +139,13 @@ class EntryScene(scenes.scene_object.SceneObject):
         """Open a file dialog to select multiple PDF files"""
         root = tk.Tk()
         root.withdraw()  # Hide the root window
-        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+        file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf"),("OBJ files", "*.obj")])
         if file_paths:
             print("Selected files:", file_paths)
+            for each in file_paths:
+                self.build_building_callback(each)
             # Handle the selected files here
             
         #TODO Integrate with our backend
         #For now, it calls with the default values, resulting in the default building
-        self.build_building_callback("Default")
+        #self.build_building_callback("Default")

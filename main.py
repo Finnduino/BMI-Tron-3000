@@ -4,9 +4,8 @@ from ursina.shaders import lit_with_shadows_shader
 from scenes.entry_scene import EntryScene
 from scenes.visualizer import VisualizerScene
 app = Ursina()
-
+visualizer_scene= VisualizerScene()
 entry_scene = EntryScene(dev=True)
-visualizer_scene = VisualizerScene()
 
 def switch_to_visualizer():
     entry_scene.disable()
@@ -31,6 +30,7 @@ def found_model(cabin : str, shaft: str):
 entry_scene.subscribe_to_move_to_visualizer(switch_to_visualizer)
 entry_scene.subscribe_to_elevator(found_model)
 entry_scene.subscribe_to_build_building(build_house)
+
 
 entry_scene.scene.enabled = True
 app.run()
