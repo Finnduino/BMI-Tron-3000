@@ -8,7 +8,7 @@ import json
 import mimetypes
 from io import BytesIO
 import matplotlib.pyplot as plt
-import trimesh
+import os
 
 
 def gatherData(file_path):
@@ -27,7 +27,7 @@ def gatherData(file_path):
     payload.write(file_data)
     payload.write(f"\r\n--{boundary}--\r\n".encode())
 
-    with open('../data/keysAndStuff.json') as f:
+    with open('./data/keysAndStuff.json') as f:
         data = json.load(f)
         API_KEY = data['rasterscan']
 
@@ -235,14 +235,18 @@ tmpdata=[{'walls':[{'position': [[262, 246], [538, 246]]}, {'position': [[121, 2
 
 
 # can make only one floor if passed list containing one element
-createOBJFile('floor1.obj',tmpdata[0],2,0)
+createOBJFile('floor_1.obj',tmpdata[0],2,0)
 createOBJFile('floor2.obj',tmpdata[1],2,0)
 createOBJFile('floor3.obj',tmpdata[2],2,0)
 
 
 
-def gatherFileDataFromAndReturnOBJ(file_path,filename):
-    print("Called")
-    data=gatherData(file_path)
-    createOBJFile('floor1.obj',data,2,0)
-    return filename+".obj"
+def gatherFileDataFromAndReturnABJ(file_path, filename):
+    print(os.path.isfile(f"scenes/{filename.split('.')[0]}.obj"))
+    if os.path.isfile(f"scenes/{filename.split('.')[0]}.obj"):
+        return filename.split('.')[0]+".obj"
+    #print("Called")
+    data= gatherData(file_path)
+    #print("Data gathered")
+    createOBJFile(filename+'.obj',data,2,0)
+    return filename.split(".")[0]+".obj"

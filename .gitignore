@@ -1,1 +1,6 @@
+.idea/*
+draft*
+*.pdf
+*.png
+IMAGES/*
 .venv
