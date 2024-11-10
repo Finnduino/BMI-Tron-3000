@@ -1,4 +1,5 @@
 import json
+from re import match
 
 from ursina import *
 import scenes.scene_object
@@ -49,8 +50,6 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.load_save_button.on_click = self.load_save_file
         self.load_save_button.parent = self.ui
 
-
-
         self.title = Text("Or submit the files Individually", position=(0, 0.1), origin=(0, 0))
         
         # Add the elevator model dropdown menu
@@ -58,7 +57,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.elevator_success = Text("Successfully loaded", origin=(0, -1), position=(0.1, 0))
         self.elevator_success.enabled = False
         self.elevator_select_menu = DropdownMenu("Select", buttons=(
-            DropdownMenuButton("Model 1", on_click=lambda: self.select_model("One", "One")),
+            DropdownMenuButton("Model 1", on_click=lambda:self.select_model("One", "One")),
             DropdownMenuButton("Model 2", on_click=lambda: self.select_model("Two", "Two")),
             DropdownMenuButton("Model 3", on_click=lambda: self.select_model("Three", "Three")),
         ), x=-0.115, y=0)
@@ -105,12 +104,18 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.load_button.tooltip = Tooltip('Load world')
         self.load_button.on_click = self.select_button_macro
 
+
+        self.elevator_val = 1 #default value
+
+
         if self.dev:
             self.default_load = Button(text='Load default', color=color.azure, scale=(0.1, 0.05), origin=(0, 0), x=-0.5, y=0.2)
             self.default_load.fit_to_text()
             self.default_load.parent = self.ui
             self.default_load.tooltip = Tooltip('Load default')
-            self.default_load.on_click = lambda: self.build_building_callback("Default")
+            self.default_load.on_click = lambda: self.build_building_callback("Default", self.elevator_val)
+
+
 
     
     def select_button_macro(self):
@@ -132,10 +137,15 @@ class EntryScene(scenes.scene_object.SceneObject):
     def subscribe_to_open_manual_editor(self, methodname):
         self.move_to_manual_editor_callback = methodname
     
-    
+
+
     def select_model(self, cabin: str = "elevatorOne", shaft : str = "shaftOne"):
         """This method is called for selecting the elevator model"""        
-        #Find the subdirectory where the 3D models are stored 
+        #Find the subdirectory where the 3D models are stored
+        if cabin == "One": self.elevator_val = 1
+        elif cabin == "Two": self.elevator_val = 2
+        elif cabin == "Three": self.elevator_val = 3
+
         self.found_elevator_callback(cabin, shaft)
         #if os.path.exists(f"\\models\\{cabin}") and os.path.exists(f"\\models\\{shaft}"):
         #    path = "\\models\\"
@@ -167,7 +177,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         elevator_position = data.get('elevator_position', None)
 
         for file_path in input_files:
-            self.build_building_callback(file_path)
+            self.build_building_callback(file_path, self.elevator_val)
 
         if elevator_position:
             print("Elevator position should be changed ?")
@@ -181,7 +191,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         if file_paths:
             print("Selected files:", file_paths)
             for each in file_paths:
-                self.build_building_callback(each)
+                self.build_building_callback(each,self.elevator_val)
             # Handle the selected files here
 
         #TODO Integrate with our backend

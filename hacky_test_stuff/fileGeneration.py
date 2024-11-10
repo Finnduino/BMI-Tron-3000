@@ -235,18 +235,27 @@ tmpdata=[{'walls':[{'position': [[262, 246], [538, 246]]}, {'position': [[121, 2
 
 
 # can make only one floor if passed list containing one element
-createOBJFile('floor_1.obj',tmpdata[0],2,0)
-createOBJFile('floor2.obj',tmpdata[1],2,0)
-createOBJFile('floor3.obj',tmpdata[2],2,0)
+#createOBJFile('floor_1.obj',tmpdata[0],2,0)
+#createOBJFile('floor2.obj',tmpdata[1],2,0)
+#createOBJFile('floor3.obj',tmpdata[2],2,0)
 
+def getElevatorData(site):
+    path=f"SiteMaterial/Material to share/Site {site}/svg_output/site_{site}.json"
+    with open(path) as f:
+        data = json.load(f)
+    return data
+    floors=data["Number_of_floors"][0]
+    height=data["Elevators"]["Floor_to_floor_height_mm"][0]
+    floorHeight=height/floors
+    return floorHeight
 
-
-def gatherFileDataFromAndReturnABJ(file_path, filename):
-    print(os.path.isfile(f"scenes/{filename.split('.')[0]}.obj"))
+def gatherFileDataFromAndReturnABJ(file_path, filename,elevatorNumber):
     if os.path.isfile(f"scenes/{filename.split('.')[0]}.obj"):
         return filename.split('.')[0]+".obj"
     #print("Called")
+
+
     data= gatherData(file_path)
     #print("Data gathered")
-    createOBJFile(filename+'.obj',data,2,0)
+    createOBJFile(filename+'.obj',data,getElevatorData(elevatorNumber),0)
     return filename.split(".")[0]+".obj"

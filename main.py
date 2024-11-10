@@ -28,10 +28,10 @@ def switch_to_manual_editor():
     entry_scene.disable()
     manual_editor_scene.enable()
 
-def build_house(name: str):
+def build_house(name: str, elevatorNbr):
     #TODO: implement this
     print("brrr emulating talking to a server and serving the pdfs or whatever")
-    visualizer_scene.load_building(name)
+    visualizer_scene.load_building(name,elevatorNbr)
     
 def found_model(cabin : str, shaft: str):
     print("Found model", cabin, shaft)

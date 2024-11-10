@@ -82,7 +82,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
 
 
 
-    def load_building(self, name: str = None):
+    def load_building(self, name: str = None,elevatorNbr=1):
         floor_array = []
         building_parent = Entity()
         if name:
@@ -104,7 +104,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
                 fFormat=last.split(".")[-1]
 
                 if not fFormat=="obj":
-                    last = hacky_test_stuff.fileGeneration.gatherFileDataFromAndReturnABJ(name, last)
+                    last = hacky_test_stuff.fileGeneration.gatherFileDataFromAndReturnABJ(name, last,elevatorNbr)
 
                 floor=Entity(model=last, scale=(0.5, 1, 0.5), y=self.heightCounter, collider='box')
                 self.heightCounter+=2
@@ -158,6 +158,12 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             child.color = color.rgba(0,0,0,0)
 
         #TODO scale the cabin and shaft to fit the building
+
+
+
+
+
+
 
     def place_elevator(self):
         self.done_placing_button.enabled = True
