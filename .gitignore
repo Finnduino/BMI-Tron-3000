@@ -3,3 +3,4 @@ draft*
 *.pdf
 *.png
 IMAGES/*
+.venv
