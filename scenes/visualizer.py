@@ -201,7 +201,7 @@ class VisualizerScene(scenes.scene_object.SceneObject):
             print(child.name)
             child.animate("color", self.placed_elevator_color, duration=2, curve=curve.in_out_expo)
             child.parent = self.elevator_parent
-            child.world_position = world_position + child.position
+            child.world_position = world_position + child.position - (0, 3.05, 0)
         invoke(self.disable_indicator, delay=2)
         
     def spin(self, e: Entity):
