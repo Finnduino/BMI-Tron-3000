@@ -6,6 +6,7 @@ class SceneObject():
     def __init__(self):
         self.scene = Entity()
         self.ui = Entity(parent=camera.ui)
+
     def enable(self):
         """Enable the scene"""
         self.scene.enabled = True

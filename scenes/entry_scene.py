@@ -31,6 +31,7 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.found_elevator_callback = None
         self.move_to_visualizer_callback = None
         self.build_building_callback = None
+        self.move_to_manual_editor_callback = None
         
         self.autofill_title = Text("Submit all of the inputs at the same time", position=(0, 0.3), origin=(0, 0))
         
@@ -68,9 +69,10 @@ class EntryScene(scenes.scene_object.SceneObject):
         self.scale_input.parent = self.shaft_wrapper
 
         # Metadata file button
-        self.metadata_text = Text("Metadata", x=-0.3, y=-0.2, origin=(0, 0))
-        self.metadata_fb = Button(text='Browse File', color=KONE_BLUE, x=-0.3, y=-0.26, origin=(0, 0))
+        self.metadata_text = Text("Manual Editor", x=-0.3, y=-0.2, origin=(0, 0))
+        self.metadata_fb = Button(text='Manually map the layout', color=KONE_BLUE, x=-0.3, y=-0.26, origin=(0, 0))
         self.metadata_fb.fit_to_text()
+        self.metadata_fb.on_click = lambda: self.move_to_manual_editor_callback()
 
         # Floor plans file button
         self.floor_plans_text = Text("Floor Plans", x=0.3, y=-0.2, origin=(0, 0))
@@ -117,6 +119,10 @@ class EntryScene(scenes.scene_object.SceneObject):
         print("Subscribed to build building")
         self.build_building_callback = methodname
     
+    def subscribe_to_open_manual_editor(self, methodname):
+        self.move_to_manual_editor_callback = methodname
+    
+    
     def select_model(self, cabin: str = "elevatorOne", shaft : str = "shaftOne"):
         """This method is called for selecting the elevator model"""        
         #Find the subdirectory where the 3D models are stored 
@@ -129,7 +135,7 @@ class EntryScene(scenes.scene_object.SceneObject):
     def select_building(self):
         """This method is called for selecting the building model"""
         # Here you can add the logic to select and load a building model
-        for each in self.selected_files:
+        for each in self.seleceted_files:
             self.build_building_callback
     
     def select_floor(self):
@@ -149,3 +155,4 @@ class EntryScene(scenes.scene_object.SceneObject):
         #TODO Integrate with our backend
         #For now, it calls with the default values, resulting in the default building
         #self.build_building_callback("Default")
+        
