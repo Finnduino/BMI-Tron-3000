@@ -1,4 +1,4 @@
-# BMI-Tron-3000
+# BIM-Tron-3000
  
 ##Get started
 
